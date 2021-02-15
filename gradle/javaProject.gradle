@@ -230,3 +230,41 @@ test.finalizedBy(jacocoMergeExec)
 //        classpath = files()
 //    }
 //}
+
+def nativeClassesDirectory = "${buildDir}/classes"
+def executeDataDirectory = "${buildDir}/jacoco/jacoco.exec"
+def classesDirectory = "${buildDir}/to/classes"
+
+task copyJavaClassFiles(type: Copy) {
+    from(nativeClassesDirectory) {
+        exclude 'module-info.class'
+        include '**/*.class'
+    }
+    into classesDirectory
+}
+
+task codeCoverageReport(type: JacocoReport) {
+    println("Build directory ${buildDir}")
+    println("${project.rootDir.absolutePath}")
+    println("Current Directory is ${buildDir}")
+    dependsOn(copyJavaClassFiles)
+    println("Generating report.xml")
+    executionData executeDataDirectory
+
+    additionalClassDirs files("${classesDirectory}")
+
+    reports {
+        xml.enabled = true
+        html.enabled = true
+        xml.destination = new File("${buildDir}/reports/jacoco/report.xml")
+        html.destination = new File("${buildDir}/reports/jacoco/report.html")
+    }
+
+    println("reports generated")
+
+    onlyIf = {
+        true
+    }
+}
+
+codeCoverageReport.dependsOn copyJavaClassFiles

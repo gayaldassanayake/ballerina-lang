@@ -131,3 +131,64 @@ artifacts {
         builtBy(ballerinaLangLibBuild)
     }
 }
+
+def ballerinaJarsDirectory = "${buildDir}/libs"
+def executeDataDirectory = "${buildDir}/jacoco/jacoco.exec"
+def classesDirectory = "${buildDir}/to/classes"
+def nativeClassesDirectory = "${buildDir}/classes"
+
+task copyJavaClassFilesToDir(type: Copy) {
+   from(nativeClassesDirectory) {
+       println("Copying java class files")
+       exclude 'module-info.class'
+       include '**/*.class'
+   }
+   println("Before store")
+   into classesDirectory
+   println("After store")
+}
+
+task extractBallerinaClassFiles(type: Copy) {
+   println("start of extractBallerinaClassFiles")
+   println("${buildDir}")
+//    def jars = fileTree(ballerinaJarsDirectory).findAll {
+//        println("Copying Ballerina class files")
+//        println(it)
+//        it
+//    }
+//    println("jars" + jars)
+   fileTree(ballerinaJarsDirectory).forEach { file ->
+       println("Ballerina file name"+file.name)
+       from zipTree(file).matching {
+           exclude 'module-info.class'
+           include '**/*.class'
+       }
+       into classesDirectory
+   }
+   println("End of extractBallerinaClassFiles")
+}
+
+tasks.replace("codeCoverageReport", JacocoReport).doFirst {
+   println("${project.rootDir.absolutePath}")
+   println("Current Directory is ${buildDir}")
+   println("Generating report.xml")
+   executionData executeDataDirectory
+
+   additionalClassDirs files("${classesDirectory}")
+
+   reports {
+       xml.enabled = true
+       html.enabled = true
+       xml.destination = new File("${buildDir}/reports/jacoco/report.xml")
+       html.destination = new File("${buildDir}/reports/jacoco/report.html")
+   }
+
+   println("reports generated")
+
+   onlyIf = {
+       true
+   }
+}
+
+codeCoverageReport.dependsOn copyJavaClassFilesToDir
+codeCoverageReport.dependsOn extractBallerinaClassFiles
