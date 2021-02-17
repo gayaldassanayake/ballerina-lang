@@ -230,3 +230,80 @@ test.finalizedBy(jacocoMergeExec)
 //        classpath = files()
 //    }
 //}
+
+task cleanSourceDestination {
+    delete "${buildDir}/to"
+    delete "${buildDir}/reports/jacoco"
+} 
+
+
+
+def execdestination = "${rootDir}/tests/execs"
+def executeDataDirectory = "${buildDir}/jacoco"
+
+def sourceDestination = "${rootDir}/tests/sourceFiles/${projectDir.name}"
+def nativeClassesDirectory = "${buildDir}/classes"
+
+def ballerinaSourceFolder = new File("${buildDir}/ballerina-src")
+def jacocoExecFolder = new File("${buildDir}/jacoco/jacoco.exec")
+def testExecFolder = new File("${buildDir}/jacoco/test.exec")
+
+task collectExecFiles(type: Copy){
+    from(executeDataDirectory) {
+        include 'jacoco.exec'
+        include 'test.exec'
+        rename { String fileName ->
+        "${projectDir.name}-"+fileName
+    }
+    }
+    into execdestination
+}
+
+task collectJavaSourceFiles(type: Copy){
+    if(jacocoExecFolder.exists() || testExecFolder.exists()){
+        from(nativeClassesDirectory) {
+        exclude '**/test/*'
+        exclude '**/module-info.class'
+        include '**/*.class'
+    }
+        into sourceDestination
+    }
+}
+
+task collectBallerinaSourceFiles(type: Copy){
+    if(ballerinaSourceFolder.exists() && projectDir.getParentFile().getName() == "langlib") {
+        def zipFiles = fileTree("${buildDir}/ballerina-src/target").include("**/*.zip")
+        zipFiles.forEach { zip ->
+            def jarFiles = zipTree(zip).matching { include '**/*.jar' } 
+            jarFiles.forEach { jar ->
+                from zipTree(jar).matching {
+                    exclude '**/tests/*'
+                    exclude '**/$_init.class'
+                    exclude '**/$value$Caller.class'
+                    exclude '**/$value$Detail.class'
+                    exclude '**/$value$DetailType.class'
+                    exclude '**/$value$EmptyIterator.class'
+                    exclude '**/$value$$anonType$_6.class'
+                    exclude '**/$value$$anonType$_*.class'
+                    exclude '**/$value$_Frame.class'
+                    include '**/*.class'
+                }
+                into sourceDestination
+            }
+        }
+    }
+}
+
+// task clearResources{
+//     delete "${rootDir}/tests/execs/"
+//     delete "${rootDir}/tests/sourceFiles/"
+// }
+
+task copyResources{
+
+}
+
+
+copyResources.dependsOn collectExecFiles
+copyResources.dependsOn collectJavaSourceFiles
+copyResources.dependsOn collectBallerinaSourceFiles

@@ -126,3 +126,40 @@ configurations {
 configurations.all {
     resolutionStrategy.preferProjectModules()
 }
+
+// def nativeClassesDirectory = "${rootDir}/langlib/jballerina.java/build/classes"
+def execFilesDir = "${rootDir}/tests/execs"
+// def nativeClassesDirectory = "${testBuildDir}/javaClassFiles"
+def classesDirectory = "${rootDir}/tests/sourceFiles"
+// def javaBuildDir = "${rootDir}/langlib/jballerina.java/build"
+def destinationExec = "${buildDir}/jacoco/all-test.exec"
+
+task jacocoMergeTest(type: JacocoMerge) {
+    destinationFile = file("${buildDir}/jacoco/all-test.exec")
+    executionData = fileTree("${execFilesDir}")
+    // executionData = files("${buildDir}/jacoco/test.exec", "${execFilesDir}")
+}
+
+task codeCoverageReport(type: JacocoReport) {
+
+    executionData destinationExec
+    additionalClassDirs files("${classesDirectory}")
+
+    reports {
+        xml.enabled = true
+        html.enabled = true
+        xml.destination = new File("${buildDir}/reports/jacoco/report.xml")
+        html.destination = new File("${buildDir}/reports/jacoco/report.html")
+    }
+
+    println("reports generated")
+
+    onlyIf = {
+        true
+    }
+
+}
+
+// codeCoverageReport.dependsOn copyJavaClassFiles
+// codeCoverageReport.dependsOn extractBallerinaClassFiles 
+codeCoverageReport.dependsOn jacocoMergeTest
