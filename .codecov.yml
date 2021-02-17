@@ -32,6 +32,3 @@ flags:
       - ./tests/ballerina-unit-test
       - ./bvm
       - ./stdlib
-
-fixes:
-  - "ballerina/lang$0046string/1_1_0::langlib/lang.string/src/main/ballerina"
