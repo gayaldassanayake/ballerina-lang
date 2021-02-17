@@ -34,4 +34,4 @@ flags:
       - ./stdlib
 
 fixes:
-  - "ballerina/lang$0046boolean/*/::langlib/lang.boolean/src/main/ballerina/"
+  - "ballerina/lang$0046boolean/1_0_0/boolean.bal::langlib/lang.boolean/src/main/ballerina/boolean.bal"
