@@ -34,4 +34,6 @@
 #       - ./stdlib
       
 fixes:
-  - "ballerina/lang$0046boolean/*/::../../langlib/lang.boolean/src/main/ballerina/" 
+  - "ballerina/lang$0046*/*/::../../langlib/lang.*/src/main/ballerina/" 
+
+  # - "ballerina/lang$0046boolean/*/::../../langlib/lang.boolean/src/main/ballerina/" 
