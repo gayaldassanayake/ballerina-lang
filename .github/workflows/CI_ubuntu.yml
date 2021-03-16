@@ -48,7 +48,6 @@ jobs:
         run: ./gradlew createCodeCoverageReport
 
       - name: Generate Codecov Report
-        if:  github.event_name == 'pull_request'
         uses: codecov/codecov-action@v1
         with:
           files: ./.jacoco/reports/jacoco/report.xml
