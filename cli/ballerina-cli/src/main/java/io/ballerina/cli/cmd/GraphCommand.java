@@ -42,15 +42,14 @@ import static org.wso2.ballerinalang.util.RepoUtils.isBallerinaStandaloneFile;
  *
  * @since 2201.2.0
  */
-// TODO: change the bal graph message in all places.
-@CommandLine.Command(name = GRAPH_COMMAND, description = "bal graph - Print the final dependency graph")
+@CommandLine.Command(name = GRAPH_COMMAND, description = "bal graph - Print the dependency graph")
 public class GraphCommand {
     private final PrintStream outStream;
     private final PrintStream errStream;
     private final boolean exitWhenFinish;
     @CommandLine.Parameters(arity = "0..1")
     private final Path projectPath;
-    @CommandLine.Option(names = "--dump-raw-graphs", description = "Print the dependency graphs created in each " +
+    @CommandLine.Option(names = "--dump-raw-graphs", description = "Print all dependency graphs created in each " +
             "attempt to update.", defaultValue = "false")
     private boolean dumpRawGraphs;
     @CommandLine.Option(names = {"--help", "-h"}, hidden = true, defaultValue = "false")
@@ -128,6 +127,9 @@ public class GraphCommand {
             Runtime.getRuntime().exit(0);
         }
     }
+
+    // TODO: override getName and printLongDesc methods
+    // TODO: break execute into small functions
 
     private BuildOptions constructBuildOptions() {
         BuildOptions.BuildOptionsBuilder buildOptionsBuilder = BuildOptions.builder();

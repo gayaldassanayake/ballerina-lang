@@ -1,5 +1,5 @@
 NAME
-       ballerina-graph - Print the final dependency graph
+       ballerina-graph - Print the dependency graph
 
 SYNOPSIS
        bal graph [OPTIONS] [<package>|<source-file>]
@@ -9,13 +9,15 @@ DESCRIPTION
        Resolve the dependencies of the current package and print the final
        dependency graph into the console.
 
-       Graph prints the dependency graph in DOT graph description language.
+       This produces the textual representation of the dependency graph
+       using the DOT graph description.
 
 
 OPTIONS
        --dump-raw-graphs
-          Print the dependency graphs created in each attempt to update. The
-          graphs are in DOT graph description language.
+          Print all the dependency graphs created in each attempt to update.
+          This produces the textual representation of the dependency graph
+          using the DOT graph description language.
 
        --offline
            Proceed without accessing the network. Attempt to proceed with the
