@@ -43,16 +43,15 @@ import static org.wso2.ballerinalang.util.RepoUtils.isBallerinaStandaloneFile;
  * @since 2201.2.0
  */
 // TODO: change the bal graph message in all places.
-@CommandLine.Command(name = GRAPH_COMMAND, description = "bal graph - Print the dependency graph of a Ballerina "
-        + "project in DOT graph description language")
+@CommandLine.Command(name = GRAPH_COMMAND, description = "bal graph - Print the final dependency graph")
 public class GraphCommand {
     private final PrintStream outStream;
     private final PrintStream errStream;
     private final boolean exitWhenFinish;
     @CommandLine.Parameters(arity = "0..1")
     private final Path projectPath;
-    @CommandLine.Option(names = "--dump-raw-graphs", description = "Print the raw dependency graphs",
-            defaultValue = "false")
+    @CommandLine.Option(names = "--dump-raw-graphs", description = "Print the dependency graphs created in each " +
+            "attempt to update.", defaultValue = "false")
     private boolean dumpRawGraphs;
     @CommandLine.Option(names = {"--help", "-h"}, hidden = true, defaultValue = "false")
     private boolean helpFlag;
