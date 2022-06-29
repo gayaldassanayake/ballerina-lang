@@ -44,6 +44,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -52,6 +53,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -272,6 +275,7 @@ public abstract class BalaWriter {
         // adds all the includes to the root dir
         List<String> includes = this.packageContext.packageManifest().includes();
         for (String include : includes) {
+            List<Path> includeMatches = filterInclude(this.packageContext.project().sourceRoot(), include);
             Path includeAbsolutePath = this.packageContext.project().sourceRoot().resolve(include);
             if (Files.notExists(includeAbsolutePath)) {
                 throw new ProjectException("Non existing path for include: " + include);
@@ -302,6 +306,18 @@ public abstract class BalaWriter {
         } catch (IOException e) {
             throw new ProjectException("Failed to write '" + DEPENDENCY_GRAPH_JSON + "' file: " + e.getMessage(), e);
         }
+    }
+
+    private List<Path> filterInclude(Path rootPath, String include) {
+        List<Path> includes;
+        try (Stream<Path> pathStream = Files.walk(rootPath, 10)) {
+            includes = pathStream
+                    .filter(FileSystems.getDefault().getPathMatcher(include)::matches)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new ProjectException("Error while retrieving resources: " + e.getMessage());
+        }
+        return includes;
     }
 
     private Path getPathRelativeToPackageRoot(Path absolutePath) {

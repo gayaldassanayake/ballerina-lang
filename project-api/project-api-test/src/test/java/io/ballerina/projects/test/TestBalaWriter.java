@@ -488,6 +488,24 @@ public class TestBalaWriter {
         }
     }
 
+    @Test(description = "tests build project with non existing includes")
+    public void testBuildProjectTest(ITestContext ctx) throws IOException {
+        Path packagePath = BALA_WRITER_RESOURCES.resolve("testProject");
+        ctx.getCurrentXmlTest().addParameter(PACKAGE_PATH, String.valueOf(packagePath));
+
+        BuildProject buildProject = BuildProject.load(packagePath);
+        PackageCompilation compilation = buildProject.currentPackage().getCompilation();
+        JBallerinaBackend jBallerinaBackend = JBallerinaBackend.from(compilation, JvmTarget.JAVA_11);
+        Target target = new Target(buildProject.sourceRoot());
+
+//        try {
+        jBallerinaBackend.emit(JBallerinaBackend.OutputType.BALA, target.getBalaPath());
+//            Assert.fail("Should recieve a ProjectException due to non existing path for includes");
+//        } catch (ProjectException e) {
+//            Assert.assertEquals(e.getMessage(), "Non existing path for include: include-dir");
+//        }
+    }
+
     @AfterMethod(alwaysRun = true)
     public void cleanup(ITestContext ctx) {
         ProjectUtils.deleteDirectory(this.tmpDir);

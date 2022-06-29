@@ -272,9 +272,36 @@ public class CommandUtil {
             Files.walkFileTree(platformLibPath, new FileUtils.Copy(platformLibPath, libs));
         }
 
-        // Copy icon
+        copyIcon(balaPath, projectPath);
+        copyIncludes(balaPath, projectPath, templatePackageJson);
+    }
+
+    private static void copyIcon(Path balaPath, Path projectPath) {
         Path docsPath = balaPath.resolve(ProjectConstants.BALA_DOCS_DIR);
         try (Stream<Path> pathStream = Files.walk(docsPath, 1)) {
+            List<Path> icon = pathStream
+                    .filter(FileSystems.getDefault().getPathMatcher("glob:**.png")::matches)
+                    .collect(Collectors.toList());
+            if (icon.isEmpty()) {
+                return;
+            }
+            Path projectDocsDir = projectPath.resolve(ProjectConstants.BALA_DOCS_DIR);
+            Files.createDirectory(projectDocsDir);
+            Path projectIconPath = projectDocsDir.resolve(Optional.of(icon.get(0).getFileName()).get());
+            Files.copy(icon.get(0), projectIconPath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            printError(errStream,
+                    "Error while retrieving the icon: " + e.getMessage(),
+                    null,
+                    false);
+            getRuntime().exit(1);
+        }
+    }
+
+    private static void copyIncludes(Path balaPath, Path projectPath, PackageJson packageJson) {
+
+        try (Stream<Path> pathStream = Files.walk(balaPath, 10)) {
+
             List<Path> icon = pathStream
                     .filter(FileSystems.getDefault().getPathMatcher("glob:**.png")::matches)
                     .collect(Collectors.toList());
@@ -389,18 +416,20 @@ public class CommandUtil {
         Files.writeString(balTomlPath, "\nname = \"" + packageName + "\"", StandardOpenOption.APPEND);
         Files.writeString(balTomlPath, "\nversion = \"" + packageJson.getVersion() + "\"",
                 StandardOpenOption.APPEND);
+
         List<String> newModuleNames = packageJson.getExport().stream().map(module ->
                 module.replaceFirst(packageJson.getName(), packageName)).collect(Collectors.toList());
+        String exportsString = joinStrings(newModuleNames);
 
-        StringJoiner stringJoiner = new StringJoiner(",");
-        for (String newModuleName : newModuleNames) {
-            stringJoiner.add("\"" + newModuleName + "\"");
-        }
+        List<String> includes = packageJson.getIncludes();
+        String includesString = joinStrings(includes);
 
-        Files.writeString(balTomlPath, "\nexport = [" + stringJoiner + "]"
+        Files.writeString(balTomlPath, "\nexport = [" + exportsString + "]"
                 .replaceFirst(packageJson.getName(), packageName), StandardOpenOption.APPEND);
         Files.writeString(balTomlPath, "\ndistribution = \"" + packageJson.getBallerinaVersion()
                 + "\"", StandardOpenOption.APPEND);
+        Files.writeString(balTomlPath, "\nincludes = [" + includesString + "]"
+                .replaceFirst(packageJson.getName(), packageName), StandardOpenOption.APPEND);
 
         writePackageAttributeArray(balTomlPath, packageJson.getLicenses(), "license");
         writePackageAttributeArray(balTomlPath, packageJson.getAuthors(), "authors");
@@ -506,6 +535,14 @@ public class CommandUtil {
             pkgDesc.append("\n");
         }
         Files.writeString(depsTomlPath, pkgDesc.toString(), StandardOpenOption.APPEND);
+    }
+
+    private static String joinStrings(List<String> stringList) {
+        StringJoiner stringJoiner = new StringJoiner(",");
+        for (String element : stringList) {
+            stringJoiner.add("\"" + element + "\"");
+        }
+        return stringJoiner.toString();
     }
 
     /**
