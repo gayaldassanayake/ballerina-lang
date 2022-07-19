@@ -145,6 +145,7 @@ public class Utils {
             File platformDir = balaCacheWithPkgPath.getParent().toFile();
 
             if (!tempDir.renameTo(platformDir)) {
+                tempDir.delete();
                 throw new CentralClientException(logFormatter.formatLog("error creating directory for bala file"));
             }
         } catch (NullPointerException e) {
