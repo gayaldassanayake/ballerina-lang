@@ -22,12 +22,14 @@ import io.ballerina.projects.PackageName;
 import io.ballerina.projects.PackageOrg;
 import io.ballerina.projects.PackageVersion;
 import io.ballerina.projects.Project;
+import io.ballerina.projects.ProjectException;
 import io.ballerina.projects.environment.PackageRepository;
 import io.ballerina.projects.environment.ResolutionOptions;
 import io.ballerina.projects.environment.ResolutionRequest;
 import io.ballerina.projects.internal.environment.BallerinaDistribution;
 import io.ballerina.projects.internal.environment.BallerinaUserHome;
 import io.ballerina.projects.internal.environment.DefaultEnvironment;
+import io.ballerina.projects.util.ProjectUtils;
 import org.ballerinalang.langserver.commons.DocumentServiceContext;
 import org.ballerinalang.langserver.commons.LanguageServerContext;
 import org.wso2.ballerinalang.compiler.util.Names;
@@ -162,7 +164,12 @@ public class LSPackageLoader {
                 String version = components[1];
                 PackageOrg packageOrg = PackageOrg.from(key);
                 PackageName packageName = PackageName.from(nameComponent);
-                PackageVersion pkgVersion = PackageVersion.from(version);
+                PackageVersion pkgVersion;
+                try {
+                    pkgVersion = PackageVersion.from(version);
+                } catch (ProjectException e) {
+                    pkgVersion = ProjectUtils.defaultVersion();
+                }
                 PackageDescriptor pkdDesc = PackageDescriptor.from(packageOrg, packageName, pkgVersion);
                 ResolutionRequest request = ResolutionRequest.from(pkdDesc, PackageDependencyScope.DEFAULT);
 
