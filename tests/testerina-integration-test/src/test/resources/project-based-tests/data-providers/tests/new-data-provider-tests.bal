@@ -33,10 +33,10 @@ function fruitsDataProviderTest(int value1, int value2, string fruit) returns er
     test:assertEquals(fruit.length(), 6);
 }
 
-@test:Config{
+@test:Config {
     dataProvider: dataGen3
 }
-function jsonDataProviderTest (json json1, json json2, json json3) {
+function jsonDataProviderTest(json json1, json json2, json json3) {
     json a = {"a": "a"};
     json b = {"b": "b"};
     json c = {"c": "c"};
@@ -84,7 +84,22 @@ function testFunction2(int value1, int value2, int result1) returns error? {
     dataProvider: dataGen9
 }
 function testFunction3(string value1, string value2) returns error? {
-   test:assertEquals("E", value1, msg = "The code fragment is not correct.");
+    test:assertEquals("E", value1, msg = "The code fragment is not correct.");
+}
+
+@test:Config {
+    dataProvider: dataGen11
+}
+function mapOfTupleOfFunctionTest(function (int x) returns boolean func, int value) {
+    test:assertTrue(func(value));
+}
+
+@test:Config {
+    dataProvider: dataGen12
+}
+function arrayOfArrayOfFunctionTest(function (int x) returns boolean func1, function (int x) returns boolean func2) {
+    int value = 2;
+    test:assertTrue(func1(value) || func2(value));
 }
 
 function dataGen() returns map<[int, int, int]>|error {
@@ -104,7 +119,7 @@ function dataGen2() returns map<[int, int, string]>|error {
     return dataSet;
 }
 
-function dataGen3() returns map<[json,json, json]> {
+function dataGen3() returns map<[json, json, json]> {
     map<[json, json, json]> dataSet = {
         "json1": [{"a": "a"}, {"b": "b"}, {"c": "c"}],
         "json2": [{"a": "a"}, {"b": "b"}, {"c": "c"}]
@@ -112,7 +127,7 @@ function dataGen3() returns map<[json,json, json]> {
     return dataSet;
 }
 
-function dataGen4() returns map<[string]>|error{
+function dataGen4() returns map<[string]>|error {
     return error("Error occurred while generating data set.");
 }
 
@@ -144,13 +159,14 @@ function dataGen8() returns map<[int, int, int]>|error {
 
 function dataGen9() returns map<CodeFragment>|error {
     CodeFragment[] sources = [
-        ["E", "`'" +  string`"\a"` + string`"`],
+        ["E", "`'" + string `"\a"` + string `"`],
         ["E", "\"\\" + "u{D7FF}\"" + "\"\t\""],
-        ["E",  "a +\n\r b"],
+        ["E", "a +\n\r b"],
         ["E", "(x * 1) != (y / 3) || (a ^ b) == (b & c) >> (1 % 2)"],
-        ["E",  "(1"],
+        ["E", "(1"],
         ["E", "a:x(c,d)[]; ^(x|y).ok();"],
-        ["E",  string`map<any> v = { "x": 1 };`]];
+        ["E", string `map<any> v = { "x": 1 };`]
+    ];
 
     map<CodeFragment> tests = {};
     foreach var s in sources {
@@ -159,21 +175,43 @@ function dataGen9() returns map<CodeFragment>|error {
     return tests;
 }
 
+function dataGen11() returns map<[function, int]> {
+    map<[function, int]> dataSet = {
+        "1": [isOdd, 1],
+        "2": [isEven, 2],
+        "3": [isOdd, 3],
+        "4": [isEven, 4]
+    };
+    return dataSet;
+}
+
+function dataGen12() returns function[][] {
+    function[][] dataSet = [[isOdd, isEven], [isEven, isOdd], [isEven, isEven]];
+    return dataSet;
+}
+
+function isEven(int x) returns boolean {
+    return x % 2 == 0;
+}
+
+function isOdd(int x) returns boolean {
+    return x % 2 != 0;
+}
+
 type Feed record {
     int responseCode;
     string message;
 };
 
-@test:Config{ dataProvider:getStateResponseDataProvider }
+@test:Config {dataProvider: getStateResponseDataProvider}
 function testGetState(Feed dataFeed) {
     test:assertEquals(200, dataFeed.responseCode);
     test:assertEquals("Hello World!!!", dataFeed.message);
 }
 
 function getStateResponseDataProvider() returns Feed[][] {
-     return [
-            [{responseCode:200, message:"Hello World!!!"}],
-            [{responseCode:20, message:"Hello World!!!"}]
-     ];
+    return [
+        [{responseCode: 200, message: "Hello World!!!"}],
+        [{responseCode: 20, message: "Hello World!!!"}]
+    ];
 }
-
