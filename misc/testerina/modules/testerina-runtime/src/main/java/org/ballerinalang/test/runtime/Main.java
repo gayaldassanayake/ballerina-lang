@@ -80,9 +80,9 @@ public class Main {
             Path targetPath = Paths.get(args[0]);
             Path testCache = targetPath.resolve(ProjectConstants.CACHES_DIR_NAME)
                             .resolve(ProjectConstants.TESTS_CACHE_DIR_NAME);
-            boolean report = Boolean.parseBoolean(args[1]);
-            boolean coverage = Boolean.parseBoolean(args[2]);
-            TestArguments testArgs = new TestArguments(args[3], args[4], args[5]);
+            String jacocoAgentJarPath = args[1];
+            boolean report = Boolean.parseBoolean(args[2]);
+            boolean coverage = Boolean.parseBoolean(args[3]);
 
             if (report || coverage) {
                 testReport = new TestReport();
@@ -125,8 +125,8 @@ public class Main {
                         }
 
                         Path jsonTmpSummaryPath = testCache.resolve(moduleName).resolve(TesterinaConstants.STATUS_FILE);
-                        result = startTestSuit(Paths.get(testSuite.getSourceRootPath()), testSuite, jsonTmpSummaryPath,
-                                targetPath, classLoader, testArgs);
+                        result = startTestSuit(Paths.get(testSuite.getSourceRootPath()), testSuite,
+                                jsonTmpSummaryPath, classLoader, new TestArguments(args));
                         exitStatus = (result == 1) ? result : exitStatus;
                     }
                 } else {
@@ -141,10 +141,10 @@ public class Main {
     }
 
     private static int startTestSuit(Path sourceRootPath, TestSuite testSuite, Path jsonTmpSummaryPath,
-                                     Path targetPath, ClassLoader classLoader, TestArguments args) throws IOException {
+                                     ClassLoader classLoader, TestArguments args) throws IOException {
         int exitStatus = 0;
         try {
-            TesterinaUtils.executeTests(sourceRootPath, targetPath, testSuite, classLoader, args);
+            TesterinaUtils.executeTests(sourceRootPath, testSuite, classLoader, args);
         } catch (RuntimeException e) {
             exitStatus = 1;
         } finally {
