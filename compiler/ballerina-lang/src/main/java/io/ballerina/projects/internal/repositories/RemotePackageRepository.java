@@ -289,6 +289,7 @@ public class RemotePackageRepository implements PackageRepository {
                 return mergeResolution(remotePackages, cachedPackages, deprecatedPackages);
 
             } catch (ConnectionErrorException e) {
+                throw new ProjectException("Connection Error: " + e.getMessage());
                 // ignore connect to remote repo failure
                 // TODO we need to add diagnostics for resolution errors
             } catch (CentralClientException e) {

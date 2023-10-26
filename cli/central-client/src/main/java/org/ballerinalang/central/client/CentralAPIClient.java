@@ -1282,6 +1282,10 @@ public class CentralAPIClient {
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS)
                 .followRedirects(false)
+                .connectTimeout(0, TimeUnit.MILLISECONDS)
+                .readTimeout(0, TimeUnit.MILLISECONDS)
+                .writeTimeout(0, TimeUnit.MILLISECONDS)
+                .callTimeout(0, TimeUnit.MILLISECONDS)
                 .retryOnConnectionFailure(true)
                 .proxy(this.proxy)
                 .build();
