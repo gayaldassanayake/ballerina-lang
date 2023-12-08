@@ -3262,7 +3262,7 @@ function testCloneWithTypeXmlToUnion() {
     test:assertValueEqual(z7 is error, true);
     if (z7 is error) {
         test:assertValueEqual("{ballerina/lang.value}ConversionError", z7.message());
-        test:assertValueEqual("'lang.xml:Comment' value cannot be converted to '(BigXml|json)'",
+        test:assertValueEqual("'lang.xml:Comment' value cannot be converted to 'JsonUnion2'",
         <string>checkpanic z7.detail()["message"]);
     }
 
@@ -3662,6 +3662,7 @@ function testCloneWithTypeToTableNegative() {
 
     UnionTable|error t2 = tab.cloneWithType();
     assertTrue(t2 is error);
+    errMsg = "'table<map<anydata>>' value cannot be converted to 'UnionTable': " + errMsgSuffix;
     if (t2 is error) {
         assertEquality("{ballerina/lang.value}ConversionError", t2.message());
         assertEquality(errMsg, <string> checkpanic t2.detail()["message"]);
@@ -3697,6 +3698,7 @@ function testCloneWithTypeToTableNegative() {
 
     UnionTable|error t5 = tab3.cloneWithType();
     assertTrue(t5 is error);
+    errMsg = "'table<map<anydata>>' value cannot be converted to 'UnionTable': " + errMsgSuffix;
     if (t5 is error) {
         assertEquality("{ballerina/lang.value}ConversionError", t5.message());
         assertEquality(errMsg, <string> checkpanic t5.detail()["message"]);
@@ -3751,6 +3753,28 @@ function testCloneWithTypeToTableNegative() {
         assertEquality("{ballerina/lang.value}ConversionError", newestEmployees.message());
         assertEquality(errMsg, <string> checkpanic newestEmployees.detail()["message"]);
     }
+}
+
+type A1 record {
+    int a;
+};
+
+type AB A1|int;
+
+type AC A1|string;
+
+function testCloneWithTypeToRecordWithIntersectingUnionMembers() {
+    // `AB & AC` is `A1`
+    map<anydata> x = {a: "Ballerina", b: true};
+    AB|AC|boolean|error z = x.cloneWithType();
+    assertTrue(z is error);
+    string errMsg = "'map<anydata>' value cannot be converted to '(AB|AC|boolean)': " +
+                    "\n\t\t{" +
+                    "\n\t\t  field 'a' in record 'A1' should be of type 'int', found '\"Ballerina\"'" +
+                    "\n\t\t}";
+    error errorZ = <error>z;
+    assertEquality("{ballerina/lang.value}ConversionError", errorZ.message());
+    assertEquality(errMsg, <string> checkpanic errorZ.detail()["message"]);
 }
 
 type GraphQLQuery record {|
@@ -4619,6 +4643,39 @@ function testLast() {
     assertEquality(4, value:last(4, ...ar));
     int[] ar1 = [1, 2, 3];
     assertTrue([] == value:last(ar1, ar));
+}
+
+public type Copybook record {
+    DFH\-COMMAREA DFH\-COMMAREA?;
+};
+
+public type DFH\-COMMAREA record {
+    record {
+        string MI\-HDR\-VERSION?;
+        string MI\-HDR\-MSGID?;
+        string MI\-HDR\-LOGGINGID?;
+        record {
+            string MI\-HDR\-REPLYQMGR?;
+        }[2] MI\-HDR\-REPLYSTACK?;
+    } BROKER\-MESSAGE\-AREA?;
+};
+
+function testCloneWithTypeToRecordWithSpecialChars() {
+    string s = string `{
+    "DFH-COMMAREA": {
+        "BROKER-MESSAGE-AREA": {
+            "MI-HDR-VERSION": "2",
+            "MI-HDR-MSGID":"3238763233323598798798712321187612",
+            "MI-HDR-LOGGINGID": "Z5118761-Z"
+        }
+    }
+    }`;
+    json rec = checkpanic value:fromJsonString(s);
+    map<json> mapJson = checkpanic rec.ensureType();
+    Copybook|error dfh\-commarea = mapJson.cloneWithType();
+    assertTrue(dfh\-commarea is Copybook);
+    Copybook cb =  checkpanic dfh\-commarea.ensureType();
+    assertEquality(cb.DFH\-COMMAREA?.BROKER\-MESSAGE\-AREA.toString(), string `{"MI-HDR-VERSION":"2","MI-HDR-MSGID":"3238763233323598798798712321187612","MI-HDR-LOGGINGID":"Z5118761-Z"}`);
 }
 
 type AssertionError distinct error;
