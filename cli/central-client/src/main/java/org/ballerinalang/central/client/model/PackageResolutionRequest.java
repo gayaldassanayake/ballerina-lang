@@ -46,7 +46,7 @@ public class PackageResolutionRequest {
     /**
      * Package resolution request package model.
      */
-    static class Package {
+    public static class Package {
         private String org;
         private String name;
 
@@ -132,6 +132,10 @@ public class PackageResolutionRequest {
     public void addPackage(String orgName, String name, String version, Mode mode) {
         // The version is encoded to avoid issue handling the dash in pre-release version tag
         packages.add(new Package(orgName, name, URLEncoder.encode(version, StandardCharsets.UTF_8), mode));
+    }
+
+    public List<Package> getPackages() {
+        return packages;
     }
 
     static class EmptyStringTypeAdapter

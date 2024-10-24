@@ -16,8 +16,10 @@ import io.ballerina.projects.environment.PackageRepository;
 import io.ballerina.projects.environment.ResolutionOptions;
 import io.ballerina.projects.environment.ResolutionRequest;
 import io.ballerina.projects.environment.ResolutionResponse;
+import io.ballerina.projects.internal.DependencyResolver;
 import io.ballerina.projects.internal.ImportModuleRequest;
 import io.ballerina.projects.internal.ImportModuleResponse;
+import io.ballerina.projects.internal.indices.FileSystemRepositoryIndex;
 import org.ballerinalang.central.client.CentralAPIClient;
 import org.ballerinalang.central.client.CentralClientConstants;
 import org.ballerinalang.central.client.exceptions.CentralClientException;
@@ -59,10 +61,12 @@ public class RemotePackageRepository implements PackageRepository {
 
     private final FileSystemRepository fileSystemRepo;
     private final CentralAPIClient client;
+    private final FileSystemRepositoryIndex fileSystemRepositoryIndex;
 
     public RemotePackageRepository(FileSystemRepository fileSystemRepo, CentralAPIClient client) {
         this.fileSystemRepo = fileSystemRepo;
         this.client = client;
+        this.fileSystemRepositoryIndex = new FileSystemRepositoryIndex(fileSystemRepo); // TODO: wrap it with a remote repo index and have the remote repo index here.
     }
 
     public static RemotePackageRepository from(Environment environment, Path cacheDirectory, String repoUrl,
@@ -362,8 +366,12 @@ public class RemotePackageRepository implements PackageRepository {
         String supportedPlatform = Arrays.stream(JvmTarget.values())
                 .map(target -> target.code())
                 .collect(Collectors.joining(","));
-        PackageResolutionResponse packageResolutionResponse = client.resolveDependencies(
-                packageResolutionRequest, supportedPlatform, RepoUtils.getBallerinaVersion());
+        DependencyResolver dependencyResolver = new DependencyResolver(fileSystemRepositoryIndex);
+        PackageResolutionResponse packageResolutionResponse = dependencyResolver.resolveDependencies(packageResolutionRequest, supportedPlatform,
+                RepoUtils.getBallerinaVersion());
+        // TODO: Replace this with the index based resolution
+//        PackageResolutionResponse packageResolutionResponse = client.resolveDependencies(
+//                packageResolutionRequest, supportedPlatform, RepoUtils.getBallerinaVersion());
         for (ResolutionRequest resolutionRequest : packageLoadRequests) {
             if (resolvedRequests.contains(resolutionRequest)) {
                 continue;

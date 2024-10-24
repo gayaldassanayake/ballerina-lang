@@ -36,6 +36,9 @@ dependencies {
     implementation libs.ow2.asm
     implementation libs.commons.io
     implementation libs.zafarkhaja.jsemver
+    implementation(libs.jgit) {
+        exclude group: 'commons-codec', module: 'commons-codec'
+    }
     testImplementation(libs.guru.nidi.graphviz) {
         because("We use this library to execute package resolution tests")
     }

@@ -936,6 +936,7 @@ public class CentralAPIClient {
         }
     }
 
+    // TODO: replaced by index search
     /**
      * Resolve Dependencies from central.
      *
@@ -1013,6 +1014,7 @@ public class CentralAPIClient {
         }
     }
 
+    // TODO: replaced by index search
     /**
      * Resolve Tools from central.
      *
@@ -1088,6 +1090,7 @@ public class CentralAPIClient {
         }
     }
 
+    // TODO: This shouldn't be replaced now. However should be eventually replaced.
     /**
      * Search packages in registry.
      */
@@ -1157,6 +1160,7 @@ public class CentralAPIClient {
         }
     }
 
+    // TODO: This shouldn't be replaced now. However should be eventually replaced.
     /**
      * Search tools in central.
      */
@@ -1227,6 +1231,7 @@ public class CentralAPIClient {
         }
     }
 
+    // TODO: This will not be changed.
     /**
      * Deprecate a package in registry.
      */
@@ -1345,6 +1350,7 @@ public class CentralAPIClient {
         }
     }
 
+    //
     /**
      * Get packages from central.
      *
@@ -1404,6 +1410,7 @@ public class CentralAPIClient {
         }
     }
 
+    // TODO: can but in v2
     /**
      * Get connectors with search filters.
      *

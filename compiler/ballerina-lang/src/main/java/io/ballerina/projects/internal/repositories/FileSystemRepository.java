@@ -78,19 +78,26 @@ import java.util.stream.Stream;
 public class FileSystemRepository extends AbstractPackageRepository {
     Path bala;
     private final Path cacheDir;
+    private final Path cacheDirectory;  // TODO: rename this to a better name
     private final Environment environment;
 
     // TODO Refactor this when we do repository/cache split
     public FileSystemRepository(Environment environment, Path cacheDirectory) {
+        this.cacheDirectory = cacheDirectory;
         this.cacheDir = cacheDirectory.resolve(ProjectConstants.CACHES_DIR_NAME);
         this.bala = cacheDirectory.resolve(ProjectConstants.REPO_BALA_DIR_NAME);
         this.environment = environment;
     }
 
     public FileSystemRepository(Environment environment, Path cacheDirectory, String distributionVersion) {
+        this.cacheDirectory = cacheDirectory;
         this.cacheDir = cacheDirectory.resolve(ProjectConstants.CACHES_DIR_NAME + "-" + distributionVersion);
         this.bala = cacheDirectory.resolve(ProjectConstants.REPO_BALA_DIR_NAME);
         this.environment = environment;
+    }
+
+    public Path cacheDirectory() {
+        return cacheDirectory;
     }
 
     @Override
