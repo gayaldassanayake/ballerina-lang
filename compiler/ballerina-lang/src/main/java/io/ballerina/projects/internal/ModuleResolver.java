@@ -282,11 +282,14 @@ public class ModuleResolver {
                                                           PackageName packageName) {
         // Check whether this package is already defined in the package manifest, if so get the version
         Optional<BlendedManifest.Dependency> blendedDep = blendedManifest.dependency(packageOrg, packageName);
-        if (blendedDep.isPresent() && blendedDep.get().moduleNames().contains(moduleName)) {
-            return createPkgDesc(packageOrg, packageName, blendedDep.get());
-        } else {
-            return null;
+        if (blendedDep.isPresent()) {
+            // If the module is from the package manifest, the module details might be empty.
+            // We can still take the matched dependency if the module is the default module.
+            if (blendedDep.get().moduleNames().contains(moduleName) || moduleName.equals(packageName.value())) {
+                return createPkgDesc(packageOrg, packageName, blendedDep.get());
+            }
         }
+        return null;
     }
 
     private PackageOrg getPackageOrg(ModuleLoadRequest moduleLoadRequest) {
